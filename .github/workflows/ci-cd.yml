@@ -1,0 +1,75 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Job 1: Test
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests
+      run: npm test
+    
+    - name: Upload coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage
+        path: coverage/
+
+  # Job 2: Build Docker Image
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Build Docker image
+      run: docker build -t my-cicd-app:${{ github.sha }} .
+    
+    - name: Test Docker image
+      run: |
+        docker run -d -p 3000:3000 --name test-container my-cicd-app:${{ github.sha }}
+        sleep 5
+        curl http://localhost:3000/health
+        docker stop test-container
+
+  # Job 3: Deploy (simulated)
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Simulate deployment
+      run: |
+        echo "Deploying version ${{ github.sha }}"
+        echo "In real scenario, this would deploy to:"
+        echo "- AWS ECS/EKS"
+        echo "- Google Cloud Run"
+        echo "- Azure App Service"
+        echo "- Or your own servers"
