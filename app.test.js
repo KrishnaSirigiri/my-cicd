@@ -29,4 +29,10 @@ describe('API Tests', () => {
     expect(response.status).toBe(200);
     expect(response.body.result).toBe('Cannot divide by zero');
   });
+  
+  test('GET /multiply should multiply numbers', async () => {
+    const response = await request(app).get('/multiply/5/3');
+    expect(response.status).toBe(200);
+    expect(response.body.result).toBe(15);
+  });
 });

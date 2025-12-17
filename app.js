@@ -11,6 +11,12 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date() });
 });
 
+app.get('/multiply/:num1/:num2', (req, res) => {
+  const num1 = parseInt(req.params.num1);
+  const num2 = parseInt(req.params.num2);
+  res.json({ result: num1 * num2 });
+});
+
 app.post('/calculate', (req, res) => {
   const { num1, num2, operation } = req.body;
   let result;
